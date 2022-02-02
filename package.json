@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "vite": "^2.7.2"
+  },
+  "dependencies": {
+    "babylonjs": "^4.2.1"
   }
 }
