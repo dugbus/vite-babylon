@@ -1,38 +1,77 @@
 import './styles.css'
 import * as BABYLON from 'babylonjs';
 
-// Get the canvas DOM element
-var canvas = document.getElementById('renderCanvas');
-// Load the 3D engine
-var engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true});
-// CreateScene function that creates and return the scene
-var createScene = function(){
-    // Create a basic BJS Scene object
-    var scene = new BABYLON.Scene(engine);
-    // Create a FreeCamera, and set its position to {x: 0, y: 5, z: -10}
-    var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5, -10), scene);
-    // Target the camera to scene origin
-    camera.setTarget(BABYLON.Vector3.Zero());
-    // Attach the camera to the canvas
-    camera.attachControl(canvas, false);
-    // Create a basic light, aiming 0, 1, 0 - meaning, to the sky
-    var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
-    // Create a built-in "sphere" shape; its constructor takes 6 params: name, segment, diameter, scene, updatable, sideOrientation
-    var sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene, false, BABYLON.Mesh.FRONTSIDE);
-    // Move the sphere upward 1/2 of its height
-    sphere.position.y = 1;
-    // Create a built-in "ground" shape; its constructor takes 6 params : name, width, height, subdivision, scene, updatable
-    var ground = BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, scene, false);
-    // Return the created scene
-    return scene;
+var canvas = document.getElementById("renderCanvas");
+
+var startRenderLoop = function (engine, canvas) {
+    engine.runRenderLoop(function () {
+        if (sceneToRender && sceneToRender.activeCamera) {
+            sceneToRender.render();
+        }
+    });
 }
-// call the createScene function
-var scene = createScene();
-// run the render loop
-engine.runRenderLoop(function(){
-    scene.render();
-});
-// the canvas/window resize event handler
-window.addEventListener('resize', function(){
-    engine.resize();
+
+var engine = null;
+var scene = null;
+var sceneToRender = null;
+var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+var createScene = function() {
+  var scene = new BABYLON.Scene(engine);
+  var camera = new BABYLON.ArcRotateCamera("Camera", -1, 1, 36, BABYLON.Vector3.Zero(), scene);
+  camera.attachControl(canvas, true);
+
+  //Scene starts here
+
+  var count = 10000;
+
+  var box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene);
+
+  var material = new BABYLON.StandardMaterial("white", scene);
+  material.diffuseColor = BABYLON.Color3.White();
+
+  box.material = material;
+
+  box.registerInstancedBuffer("color", 4);
+  box.instancedBuffers.color = new BABYLON.Color4(1, 0, 0, 1);
+
+  scene.createDefaultLight();
+
+  for (var i = 0; i < count; i++) {
+    var instance = box.createInstance("box" + i);
+
+    instance.position.x = 5 - Math.random() * 10;
+    instance.position.y = 5 - Math.random() * 10;
+    instance.position.z = 5 - Math.random() * 10;
+
+    box.instancedBuffers.color = new BABYLON.Color4(1, Math.random(), Math.random(), 1);
+
+  }
+
+  scene.debugLayer.show();
+
+  return scene;
+};
+
+window.initFunction = async function() {
+
+  var asyncEngineCreation = async function() {
+    try {
+      return createDefaultEngine();
+    } catch(e) {
+      console.log("the available createEngine function failed. Creating the default engine instead");
+      return createDefaultEngine();
+    }
+  }
+
+  window.engine = await asyncEngineCreation();
+  if (!engine) throw 'engine should not be null.';
+  startRenderLoop(engine, canvas);
+  window.scene = createScene();
+};
+
+initFunction().then(() => {sceneToRender = scene});
+
+// Resize
+window.addEventListener("resize", function () {
+  engine.resize();
 });
