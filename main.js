@@ -13,7 +13,7 @@ var createScene = function() {
 
     camera.attachControl(canvas, true);
 
-    var count = 10000;
+    var count = 100;
 
     var box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene);
 
@@ -39,7 +39,9 @@ var createScene = function() {
 
     }
 
-    scene.debugLayer.show();
+    scene.debugLayer.show({
+      embedMode: true,
+    });
 
     return scene;
 }
