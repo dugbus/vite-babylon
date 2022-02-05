@@ -93,7 +93,14 @@ var createScene = function() {
     guiCanvas.addControl(guiButton)
   }
 
-  const xr = scene.createDefaultXRExperienceAsync();
+  // const xr = scene.createDefaultXRExperienceAsync();
+
+  const xr = scene.createDefaultXRExperienceAsync({
+    uiOptions: {
+      sessionMode: "immersive-ar",
+    },
+    optionalFeatures: ["hit-test", "anchors"],
+  });
 
   return scene
 }
