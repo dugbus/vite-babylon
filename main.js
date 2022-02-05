@@ -15,7 +15,7 @@ var createScene = function() {
   var scene = new BABYLON.Scene(engine)
   scene.clearColor = new BABYLON.Color4(0, 0, 0, 0)
 
-  var camera = new BABYLON.ArcRotateCamera("Camera", -1, 1, 36, BABYLON.Vector3.Zero(), scene)
+  var camera = new BABYLON.ArcRotateCamera("Camera", -1.5, 1.5, 36, BABYLON.Vector3.Zero(), scene)
 
   camera.attachControl(canvas, true)
 
@@ -40,9 +40,9 @@ var createScene = function() {
 
     boxes.push(instance)
 
-    instance.position.x = getRandomInt(-50, 50)
-    instance.position.y = getRandomInt(0, 150)
-    instance.position.z = getRandomInt(-50, 50)
+    instance.position.x = getRandomInt(-20, 20)
+    instance.position.y = getRandomInt(-20, 20)
+    instance.position.z = getRandomInt(0, 100)
 
     instance.velocity = getRandomInt(1, 15)
 
@@ -92,7 +92,7 @@ var createScene = function() {
     guiCanvas.addControl(guiButton)
   }
 
-  const xr = scene.createDefaultXRExperienceAsync();
+  //const xr = scene.createDefaultXRExperienceAsync();
 
   return scene
 }
@@ -101,9 +101,9 @@ var scene = createScene()
 
 engine.runRenderLoop( function() {
   for (var i = 0; i < boxes.length; i++) {
-    boxes[i].position.y = boxes[i].position.y - boxes[i].velocity / 100
-    if ( boxes[i].position.y < 0 ) {
-      boxes[i].position.y = 200
+    boxes[i].position.z = boxes[i].position.z - boxes[i].velocity / 100
+    if ( boxes[i].position.z < -50 ) {
+      boxes[i].position.z = 200
     }
   }
   scene.render()
