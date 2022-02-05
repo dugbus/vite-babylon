@@ -52,30 +52,41 @@ var createScene = function() {
 
   }
 
-  console.log(boxes)
+/* MOUSE VERSION */
+  // scene.onPointerDown = function castRay() {
+  //   var ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera)
+  //   var hit = scene.pickWithRay(ray)
+  //   if (hit.pickedMesh){
+  //     // createGUIButton(hit)
+  //     hit.pickedMesh.position.z = hit.pickedMesh.position.z + 10
+  //   }
+  // }
 
-  scene.onPointerDown = function castRay(){
-    var ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera)
-
-    var hit = scene.pickWithRay(ray)
-
-    // if (hit.pickedMesh && hit.pickedMesh.metadata == "box"){
-    //   createGUIButton();
-    // }
-
-    if (hit.pickedMesh){
-      // createGUIButton(hit)
-      hit.pickedMesh.position.z = hit.pickedMesh.position.z + 10
+/* XR VERSION */
+  scene.onPointerObservable.add((pointerInfo) => {
+    switch (pointerInfo.type) {
+      case BABYLON.PointerEventTypes.POINTERDOWN:
+        var pickResult = pointerInfo.pickInfo;
+        if (pickResult.hit) {
+          var pickedMesh = pickResult.pickedMesh;
+          if (pickedMesh) {
+            createGUIButton(pickedMesh)
+            pickedMesh.position.z = pickedMesh.position.z + 10
+          }
+        }
+        break;
+      case BABYLON.PointerEventTypes.POINTERPICK:
+        break;
     }
 
-  }
+  });
 
   scene.debugLayer.show({
     embedMode: true,
   })
 
   function createGUIButton(hit) {
-    let label = hit.pickedMesh.metadata
+    let label = hit.metadata
     //Creates a gui label to display the cannon
     let guiCanvas = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
     let guiButton = GUI.Button.CreateSimpleButton("guiButton", label)
@@ -93,14 +104,14 @@ var createScene = function() {
     guiCanvas.addControl(guiButton)
   }
 
-  // const xr = scene.createDefaultXRExperienceAsync();
+  const xr = scene.createDefaultXRExperienceAsync();
 
-  const xr = scene.createDefaultXRExperienceAsync({
-    uiOptions: {
-      sessionMode: "immersive-ar",
-    },
-    optionalFeatures: ["hit-test", "anchors"],
-  });
+  // const xr = scene.createDefaultXRExperienceAsync({
+  //   uiOptions: {
+  //     sessionMode: "immersive-ar",
+  //   },
+  //   optionalFeatures: ["hit-test", "anchors"],
+  // });
 
   return scene
 }
