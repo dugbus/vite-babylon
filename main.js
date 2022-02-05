@@ -93,7 +93,7 @@ var createScene = function() {
     guiCanvas.addControl(guiButton)
   }
 
-  //const xr = scene.createDefaultXRExperienceAsync();
+  const xr = scene.createDefaultXRExperienceAsync();
 
   return scene
 }
