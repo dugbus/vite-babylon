@@ -64,7 +64,8 @@ var createScene = function() {
     // }
 
     if (hit.pickedMesh){
-      createGUIButton(hit)
+      // createGUIButton(hit)
+      hit.pickedMesh.position.z = hit.pickedMesh.position.z + 10
     }
 
   }
