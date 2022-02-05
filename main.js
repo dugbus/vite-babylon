@@ -70,7 +70,7 @@ var createScene = function() {
         if (pickResult.hit) {
           var pickedMesh = pickResult.pickedMesh;
           if (pickedMesh) {
-            createGUIButton(pickedMesh)
+            //createGUIButton(pickedMesh)
             pickedMesh.position.z = pickedMesh.position.z + 10
           }
         }
