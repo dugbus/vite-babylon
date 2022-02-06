@@ -1,3 +1,7 @@
+import tunner from './assets/tunner.png'
+import tripout from './assets/tripout.png'
+
+
 export function createTunnel(scene) {
   [
     // {
@@ -7,13 +11,13 @@ export function createTunnel(scene) {
     // },
     {
       radius: 10,
-      texture: "tunner.png",
+      texture: tunner,
       uScale: 3,
       vScale: 100
     },
     {
         radius: 100,
-        texture: "tripout.png",
+        texture: tripout,
         uScale: 3,
         vScale: 100
     }

@@ -5,6 +5,8 @@ import 'babylonjs-loaders'
 import * as GUI from 'babylonjs-gui'
 import { imageTile } from './image-tiles'
 import { createTunnel } from './fly-through-tunnel'
+import sonic from './assets/sonic.png'
+import score from './assets/score.png'
 
 const canvas = document.getElementById('renderCanvas')
 
@@ -50,8 +52,8 @@ const createScene = function() {
   // scene.fogStart = 500
   // scene.fogEnd = 1000
 
-  imageTile("sonic.png", scene,0.2,500)
-  imageTile("score.png", scene, 0.2, 300)
+  imageTile(sonic, scene,0.2,500)
+  imageTile(score, scene, 0.2, 300)
   createTunnel(scene)
 
   const box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene)
