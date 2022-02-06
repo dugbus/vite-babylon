@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/vite-babylon/",
+    "build": "mkdir -p dist && cp assets/* dist && vite build --base=/vite-babylon/",
     "preview": "vite preview"
   },
   "devDependencies": {
