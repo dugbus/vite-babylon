@@ -1,27 +1,28 @@
 import './styles.css'
 import * as BABYLON from 'babylonjs'
-import * as GUI from 'babylonjs-gui'
+import 'babylonjs-gui'
+import 'babylonjs-loaders'
 
-var canvas = document.getElementById('renderCanvas')
+const canvas = document.getElementById('renderCanvas')
 
-var engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true})
+//const engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true})
+const engine = new BABYLON.Engine(canvas, true)
 
 const getRandomInt = ( min, max ) => Math.floor( Math.random() * ( max - min ) ) + min
 
-var boxes = []
+let boxes = []
 
-var createScene = function() {
+const createScene = function() {
 
-  var scene = new BABYLON.Scene(engine)
+  const scene = new BABYLON.Scene(engine)
   scene.clearColor = new BABYLON.Color4(0, 0, 0, 0)
 
-  var camera = new BABYLON.ArcRotateCamera("Camera", -1.5, 1.5, 36, BABYLON.Vector3.Zero(), scene)
-
+  const camera = new BABYLON.ArcRotateCamera("Camera", -1.5, 1.5, 36, BABYLON.Vector3.Zero(), scene)
   camera.attachControl(canvas, true)
 
-  var box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene)
+  const box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene)
 
-  var material = new BABYLON.StandardMaterial("white", scene)
+  const material = new BABYLON.StandardMaterial("white", scene)
 
   material.diffuseColor = BABYLON.Color3.White()
 
@@ -32,11 +33,11 @@ var createScene = function() {
 
   scene.createDefaultLight()
 
-  var count = 1000
+  const count = 100
 
-  for (var i = 0; i < count; i++) {
+  for (let i = 0; i < count; i++) {
 
-    var instance = box.createInstance("box" + i)
+    const instance = box.createInstance("box" + i)
 
     boxes.push(instance)
 
@@ -88,8 +89,8 @@ var createScene = function() {
   function createGUIButton(hit) {
     let label = hit.metadata
     //Creates a gui label to display the cannon
-    let guiCanvas = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
-    let guiButton = GUI.Button.CreateSimpleButton("guiButton", label)
+    let guiCanvas = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
+    let guiButton = BABYLON.GUI.Button.CreateSimpleButton("guiButton", label)
     guiButton.width = "150px"
     guiButton.height = "40px"
     guiButton.color = "white"
@@ -100,7 +101,7 @@ var createScene = function() {
       guiCanvas.dispose();
     })
 
-    guiButton.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
+    guiButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER
     guiCanvas.addControl(guiButton)
   }
 
@@ -116,10 +117,10 @@ var createScene = function() {
   return scene
 }
 
-var scene = createScene()
+const scene = createScene()
 
 engine.runRenderLoop( function() {
-  for (var i = 0; i < boxes.length; i++) {
+  for (let i = 0; i < boxes.length; i++) {
     boxes[i].position.z = boxes[i].position.z - boxes[i].velocity / 100
     if ( boxes[i].position.z < -50 ) {
       boxes[i].position.z = 200
