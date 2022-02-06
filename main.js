@@ -2,6 +2,9 @@ import './styles.css'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-gui'
 import 'babylonjs-loaders'
+import * as GUI from 'babylonjs-gui'
+import { imageTile } from './image-tiles'
+import { createTunnel } from './fly-through-tunnel'
 
 const canvas = document.getElementById('renderCanvas')
 
@@ -14,11 +17,42 @@ let boxes = []
 
 const createScene = function() {
 
-  const scene = new BABYLON.Scene(engine)
-  scene.clearColor = new BABYLON.Color4(0, 0, 0, 0)
 
-  const camera = new BABYLON.ArcRotateCamera("Camera", -1.5, 1.5, 36, BABYLON.Vector3.Zero(), scene)
+  var scene = new BABYLON.Scene(engine)
+  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1)
+
+  var camera = new BABYLON.UniversalCamera("Camera", BABYLON.Vector3.Zero(), scene)
+
   camera.attachControl(canvas, true)
+  
+  scene.activeCamera.position.x = 0;
+  scene.activeCamera.position.y = 0;
+  scene.activeCamera.position.z = 0;
+
+  // Create a skybox from a unity style skybox image
+  var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene)
+  var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
+  skyboxMaterial.backFaceCulling = false
+  skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/skybox.png", scene,)
+  skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
+  skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
+  skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0)
+  skyboxMaterial.disableLighting = true
+  skybox.material = skyboxMaterial
+
+
+
+  // // Create fade to black fog for the scene
+  // scene.fogEnabled = true
+  // scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR
+  // scene.fogDensity = 0.1
+  // scene.fogColor = new BABYLON.Color3(0, 0, 0)
+  // scene.fogStart = 500
+  // scene.fogEnd = 1000
+
+  imageTile("sonic.png", scene,0.2,500)
+  imageTile("score.png", scene, 0.2, 300)
+  createTunnel(scene)
 
   const box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene)
 
@@ -33,7 +67,7 @@ const createScene = function() {
 
   scene.createDefaultLight()
 
-  const count = 100
+  var count = 0
 
   for (let i = 0; i < count; i++) {
 
@@ -119,8 +153,24 @@ const createScene = function() {
 
 const scene = createScene()
 
+const cameraPhysics = {
+  velocity:0,
+  acceleration: 0.01
+}
 engine.runRenderLoop( function() {
-  for (let i = 0; i < boxes.length; i++) {
+  // accelerate the camera in the z direction using acceleration variables
+  cameraPhysics.velocity += cameraPhysics.acceleration
+  if (cameraPhysics.velocity > 1) {
+    cameraPhysics.velocity = 1
+  }
+  
+
+  
+
+  // Move the camera down the tunnel
+  scene.activeCamera.position.z += cameraPhysics.velocity
+    
+  for (var i = 0; i < boxes.length; i++) {
     boxes[i].position.z = boxes[i].position.z - boxes[i].velocity / 100
     if ( boxes[i].position.z < -50 ) {
       boxes[i].position.z = 200
