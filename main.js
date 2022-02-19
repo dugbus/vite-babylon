@@ -1,48 +1,60 @@
-import './styles.css'
-import * as BABYLON from 'babylonjs'
-import 'babylonjs-gui'
-import 'babylonjs-loaders'
-import * as GUI from 'babylonjs-gui'
-import { imageTile } from './image-tiles'
-import { createTunnel } from './fly-through-tunnel'
-import sonic from './assets/sonic.png'
-import score from './assets/score.png'
+import "./styles.css";
+import * as BABYLON from "babylonjs";
+import "babylonjs-gui";
+import "babylonjs-loaders";
+import * as GUI from "babylonjs-gui";
+import { imageTile, tickTiles } from "./image-tiles";
+import { createTunnel } from "./fly-through-tunnel";
+import sonic from "./assets/sonic.png";
+import score from "./assets/score.png";
+import max from "./assets/max.png";
+import getReadyGo from "./assets/getreadygo.png";
 
-const canvas = document.getElementById('renderCanvas')
+const canvas = document.getElementById("renderCanvas");
 
 //const engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true})
-const engine = new BABYLON.Engine(canvas, true)
+const engine = new BABYLON.Engine(canvas, true);
 
-const getRandomInt = ( min, max ) => Math.floor( Math.random() * ( max - min ) ) + min
+const getRandomInt = (min, max) =>
+  Math.floor(Math.random() * (max - min)) + min;
 
-let boxes = []
+const boxes = [];
+let image1Instances;
+let image2Instances;
+let image3Instances;
+let skybox;
 
-const createScene = function() {
+const createScene = async function () {
+  const scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 
+  const camera = new BABYLON.UniversalCamera(
+    "Camera",
+    BABYLON.Vector3.Zero(),
+    scene
+  );
 
-  var scene = new BABYLON.Scene(engine)
-  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1)
+  camera.attachControl(canvas, true);
 
-  var camera = new BABYLON.UniversalCamera("Camera", BABYLON.Vector3.Zero(), scene)
-
-  camera.attachControl(canvas, true)
-  
   scene.activeCamera.position.x = 0;
   scene.activeCamera.position.y = 0;
   scene.activeCamera.position.z = 0;
 
   // Create a skybox from a unity style skybox image
-  var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene)
-  var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
-  skyboxMaterial.backFaceCulling = false
-  skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/skybox.png", scene,)
-  skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
-  skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
-  skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0)
-  skyboxMaterial.disableLighting = true
-  skybox.material = skyboxMaterial
-
-
+  // skybox = BABYLON.Mesh.CreateBox("skyBox", 5000.0, scene);
+  // const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+  // skyboxMaterial.backFaceCulling = false;
+  // skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+  //   "assets/skybox",
+  //   scene,
+  //   ["-px.png", "-py.png", "-pz.png", "-nx.png", "-ny.png", "-nz.png"]
+  // );
+  // skyboxMaterial.reflectionTexture.coordinatesMode =
+  //   BABYLON.Texture.SKYBOX_MODE;
+  // skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+  // skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+  // skyboxMaterial.disableLighting = true;
+  // skybox.material = skyboxMaterial;
 
   // // Create fade to black fog for the scene
   // scene.fogEnabled = true
@@ -52,44 +64,29 @@ const createScene = function() {
   // scene.fogStart = 500
   // scene.fogEnd = 1000
 
-  imageTile(sonic, scene,0.2,500)
-  imageTile(score, scene, 0.2, 300)
-  createTunnel(scene)
+  createTunnel(scene);
+  image1Instances = await imageTile(getReadyGo, scene, 0.2, 500);
+  image2Instances = await imageTile(sonic, scene, 0.2, 1000);
+  image3Instances = await imageTile(score, scene, 0.2, 2000);
 
-  const box = BABYLON.BoxBuilder.CreateBox("box", {size: 1}, scene)
+  // Create a hemisphere light with fire in it
+  const lighttop = new BABYLON.HemisphericLight(
+    "light2",
+    new BABYLON.Vector3(0, -1, 0),
+    scene
+  );
+  lighttop.intensity = 0.5;
+  lighttop.diffuse = new BABYLON.Color3(1, 1, 1);
 
-  const material = new BABYLON.StandardMaterial("white", scene)
+  const lightbottom = new BABYLON.HemisphericLight(
+    "light3",
+    new BABYLON.Vector3(0, 1, 0),
+    scene
+  );
+  lightbottom.intensity = 0.5;
+  lightbottom.diffuse = new BABYLON.Color3(1, 1, 1);
 
-  material.diffuseColor = BABYLON.Color3.White()
-
-  box.material = material
-
-  box.registerInstancedBuffer("color", 4)
-  box.instancedBuffers.color = new BABYLON.Color4(1, 0, 0, 1)
-
-  scene.createDefaultLight()
-
-  var count = 0
-
-  for (let i = 0; i < count; i++) {
-
-    const instance = box.createInstance("box" + i)
-
-    boxes.push(instance)
-
-    instance.position.x = getRandomInt(-20, 20)
-    instance.position.y = getRandomInt(-20, 20)
-    instance.position.z = getRandomInt(0, 100)
-
-    instance.velocity = getRandomInt(1, 15)
-
-    instance.metadata = "box" + i
-
-    box.instancedBuffers.color = new BABYLON.Color4(1, Math.random(), Math.random(), 1)
-
-  }
-
-/* MOUSE VERSION */
+  /* MOUSE VERSION */
   // scene.onPointerDown = function castRay() {
   //   var ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera)
   //   var hit = scene.pickWithRay(ray)
@@ -99,46 +96,46 @@ const createScene = function() {
   //   }
   // }
 
-/* XR VERSION */
+  /* XR VERSION */
   scene.onPointerObservable.add((pointerInfo) => {
     switch (pointerInfo.type) {
       case BABYLON.PointerEventTypes.POINTERDOWN:
-        var pickResult = pointerInfo.pickInfo;
+        const pickResult = pointerInfo.pickInfo;
         if (pickResult.hit) {
           var pickedMesh = pickResult.pickedMesh;
           if (pickedMesh) {
             //createGUIButton(pickedMesh)
-            pickedMesh.position.z = pickedMesh.position.z + 10
+            pickedMesh.position.z = pickedMesh.position.z + 10;
           }
         }
         break;
       case BABYLON.PointerEventTypes.POINTERPICK:
         break;
     }
-
   });
 
   scene.debugLayer.show({
     embedMode: true,
-  })
+  });
 
   function createGUIButton(hit) {
-    let label = hit.metadata
+    const label = hit.metadata;
     //Creates a gui label to display the cannon
-    let guiCanvas = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
-    let guiButton = BABYLON.GUI.Button.CreateSimpleButton("guiButton", label)
-    guiButton.width = "150px"
-    guiButton.height = "40px"
-    guiButton.color = "white"
-    guiButton.cornerRadius = 5
-    guiButton.background = "green"
+    const guiCanvas =
+      BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    const guiButton = BABYLON.GUI.Button.CreateSimpleButton("guiButton", label);
+    guiButton.width = "150px";
+    guiButton.height = "40px";
+    guiButton.color = "white";
+    guiButton.cornerRadius = 5;
+    guiButton.background = "green";
 
-    guiButton.onPointerUpObservable.add(function() {
+    guiButton.onPointerUpObservable.add(function () {
       guiCanvas.dispose();
-    })
+    });
 
-    guiButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER
-    guiCanvas.addControl(guiButton)
+    guiButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    guiCanvas.addControl(guiButton);
   }
 
   const xr = scene.createDefaultXRExperienceAsync();
@@ -150,37 +147,40 @@ const createScene = function() {
   //   optionalFeatures: ["hit-test", "anchors"],
   // });
 
-  return scene
-}
+  return scene;
+};
 
-const scene = createScene()
-
-const cameraPhysics = {
-  velocity:0,
-  acceleration: 0.01
-}
-engine.runRenderLoop( function() {
-  // accelerate the camera in the z direction using acceleration variables
-  cameraPhysics.velocity += cameraPhysics.acceleration
-  if (cameraPhysics.velocity > 1) {
-    cameraPhysics.velocity = 1
-  }
-  
-
-  
-
-  // Move the camera down the tunnel
-  scene.activeCamera.position.z += cameraPhysics.velocity
-    
-  for (var i = 0; i < boxes.length; i++) {
-    boxes[i].position.z = boxes[i].position.z - boxes[i].velocity / 100
-    if ( boxes[i].position.z < -50 ) {
-      boxes[i].position.z = 200
+let startTime = performance.now();
+const scene = createScene().then((scene) => {
+  const cameraPhysics = {
+    velocity: 0,
+    acceleration: 0.01,
+  };
+  engine.runRenderLoop(function () {
+    if (performance.now() - startTime > 1000) {
+      tickTiles(image1Instances, scene);
     }
-  }
-  scene.render()
-} )
 
-window.addEventListener( 'resize', function() {
-  engine.resize()
-} )
+    if (performance.now() - startTime > 5000) {
+      tickTiles(image2Instances, scene);
+    }
+
+    if (performance.now() - startTime > 10000) {
+      tickTiles(image3Instances, scene);
+    }
+
+    // accelerate the camera in the z direction using acceleration variables
+    cameraPhysics.velocity += cameraPhysics.acceleration;
+    if (cameraPhysics.velocity > 5) {
+      cameraPhysics.velocity = 5;
+    }
+
+    // Move the camera down the tunnel
+    scene.activeCamera.position.z += cameraPhysics.velocity;
+    scene.render();
+  });
+
+  window.addEventListener("resize", function () {
+    engine.resize();
+  });
+});
